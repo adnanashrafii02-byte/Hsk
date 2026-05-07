@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="HSK 1"/>
+<meta name="theme-color" content="#0d0820"/>
+<title>HSK 1 শব্দভান্ডার</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Palatino Linotype', Palatino, serif;
+    background: linear-gradient(160deg, #0a0a18 0%, #0d1225 60%, #0a1a0f 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  #header {
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #0d0820 0%, #111830 100%);
+    border-bottom: 1px solid rgba(201,168,76,0.4);
+    padding: 16px 14px 12px;
+    text-align: center;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+  }
+  #header .label { font-size: 10px; color: #c9a84c; letter-spacing: 5px; margin-bottom: 4px; opacity: 0.85; }
+  #header h1 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+  #header .count { font-size: 11px; color: #6a8ab0; margin-bottom: 8px; }
+  #search {
+    width: 100%; padding: 8px 16px; border-radius: 30px;
+    border: 1.5px solid rgba(201,168,76,0.3);
+    background: rgba(255,255,255,0.06); color: #fff;
+    font-size: 13px; outline: none; font-family: inherit;
+  }
+  #search::placeholder { color: rgba(255,255,255,0.3); }
+  #search:focus { border-color: #c9a84c; }
+
+  /* ── TABS ── */
+  #tabs {
+    flex-shrink: 0;
+    display: flex;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .tab {
+    flex: 1; padding: 10px 0; text-align: center;
+    font-size: 13px; color: rgba(255,255,255,0.4);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .tab.active { color: #c9a84c; border-bottom: 2px solid #c9a84c; }
+
+  /* ── SCROLL AREA ── */
+  #content {
+    flex: 1; overflow-y: auto; padding: 10px 10px 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── VOCAB CARD ── */
+  .card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; margin-bottom: 7px; border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: background 0.15s;
+  }
+  .card:active { background: rgba(201,168,76,0.08) !important; }
+  .card.even { background: rgba(255,255,255,0.035); }
+  .card.odd  { background: rgba(255,255,255,0.018); }
+  .card.num-even { background: rgba(201,168,76,0.05); border-color: rgba(201,168,76,0.1); }
+  .card.num-odd  { background: rgba(255,255,255,0.02); border-color: rgba(201,168,76,0.06); }
+
+  .serial { min-width: 24px; font-size: 10px; color: rgba(255,255,255,0.5); text-align: center; font-family: monospace; }
+  .zh {
+    min-width: 88px; text-align: center; font-size: 58px; font-weight: 300;
+    font-family: 'Noto Sans SC','Microsoft YaHei','SimHei',Arial,sans-serif;
+    color: #fff; line-height: 1;
+    background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: 12px; padding: 8px 6px; flex-shrink: 0;
+  }
+  .zh.num { font-size: 46px; min-width: 80px; }
+  .info { flex: 1; min-width: 0; }
+  .pinyin { font-size: 15px; color: #fff; font-style: italic; margin-bottom: 2px; letter-spacing: 0.4px; }
+  .bangla { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 2px; line-height: 1.2; }
+  .english { font-size: 12px; color: rgba(255,255,255,0.6); font-style: italic; }
+  .playbtn {
+    flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%;
+    border: 1.5px solid rgba(201,168,76,0.5);
+    background: rgba(201,168,76,0.1); color: #c9a84c;
+    font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .playbtn:active { background: rgba(201,168,76,0.25); transform: scale(0.93); }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    text-align: center; padding: 20px 0 14px;
+    border-top: 1px solid rgba(201,168,76,0.2); margin-top: 8px;
+  }
+  .section-header .slabel { font-size: 10px; color: #c9a84c; letter-spacing: 5px; margin-bottom: 5px; }
+  .section-header h2 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+  .section-header p { font-size: 11px; color: rgba(255,255,255,0.35); font-style: italic; }
+
+  .empty { text-align: center; color: #444; padding: 60px 0; font-size: 15px; }
+
+  /* ── MODAL ── */
+  #modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.85); align-items: center; justify-content: center;
+    padding: 16px; backdrop-filter: blur(6px);
+  }
+  #modal-overlay.open { display: flex; }
+  #modal-box {
+    background: linear-gradient(160deg, #0d0820 0%, #111830 100%);
+    border: 1px solid rgba(201,168,76,0.45);
+    border-radius: 22px; padding: 20px 18px 16px;
+    text-align: center; width: 100%; max-width: 300px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+  }
+  #modal-label { font-size: 10px; color: #c9a84c; letter-spacing: 5px; margin-bottom: 8px; opacity: 0.85; }
+  #modal-word {
+    font-size: 38px; font-weight: 300; line-height: 1.1; letter-spacing: 4px;
+    font-family: 'Noto Sans SC','Microsoft YaHei',sans-serif; margin-bottom: 4px;
+  }
+  #modal-sub { font-size: 12px; color: rgba(255,255,255,0.45); font-style: italic; margin-bottom: 4px; }
+  #modal-counter { font-size: 11px; color: #c9a84c; margin-bottom: 10px; min-height: 16px; }
+  #modal-iframe-wrap {
+    border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    width: 100%; height: 230px;
+    background: rgba(255,255,255,0.03);
+    margin-bottom: 12px;
+  }
+  #modal-iframe { width: 100%; height: 100%; border: none; display: block; }
+  #modal-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .mbtn {
+    padding: 8px 18px; border-radius: 30px; font-size: 13px;
+    cursor: pointer; font-family: inherit; border: none;
+  }
+  .mbtn:active { opacity: 0.7; }
+  .mbtn-gold { background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.5); color: #c9a84c; }
+  .mbtn-white { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; }
+  .mbtn-nav { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; }
+  .mbtn-nav:disabled { opacity: 0.2; }
+
+  /* install banner */
+  #install-banner {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+    background: #1a1040; border-top: 1px solid rgba(201,168,76,0.4);
+    padding: 12px 16px; text-align: center;
+  }
+  #install-banner p { font-size: 13px; color: #fff; margin-bottom: 8px; }
+  #install-banner button { padding: 8px 24px; border-radius: 30px; border: none; background: #c9a84c; color: #000; font-size: 13px; cursor: pointer; font-weight: 700; margin: 0 4px; }
+  #install-banner .dismiss { background: transparent; color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.2); }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="label">✦ চীনা ভাষা শিক্ষা ✦</div>
+  <h1>HSK 1 শব্দভান্ডার</h1>
+  <div class="count" id="count-label">১৫০ টি শব্দ</div>
+  <input id="search" type="search" placeholder="🔍  বাংলা, Pinyin বা চীনায় খুঁজুন..." oninput="filterCards()"/>
+</div>
+
+<div id="tabs">
+  <div class="tab active" onclick="switchTab('vocab')">📖 শব্দ (১৫০)</div>
+  <div class="tab" onclick="switchTab('numbers')">🔢 সংখ্যা ১-২০</div>
+</div>
+
+<div id="content"></div>
+
+<!-- Modal -->
+<div id="modal-overlay" onclick="closeModal()">
+  <div id="modal-box" onclick="event.stopPropagation()">
+    <div id="modal-label">✦ লেখার ক্রম ✦</div>
+    <div id="modal-word"></div>
+    <div id="modal-sub"></div>
+    <div id="modal-counter"></div>
+    <div id="modal-iframe-wrap">
+      <iframe id="modal-iframe" sandbox="allow-scripts"></iframe>
+    </div>
+    <div id="modal-btns"></div>
+  </div>
+</div>
+
+<!-- Install Banner -->
+<div id="install-banner">
+  <p>📲 এই app টি Home Screen এ যোগ করুন!</p>
+  <button onclick="installApp()">Install করুন</button>
+  <button class="dismiss" onclick="document.getElementById('install-banner').style.display='none'">পরে</button>
+</div>
+
+<script>
+const vocab = [
+  ["爱","ài","to love","ভালোবাসা"],["八","bā","eight","আট"],["爸爸","bàba","father/dad","বাবা"],
+  ["杯子","bēizi","cup/glass","কাপ/গ্লাস"],["北京","Běijīng","Beijing","বেইজিং"],
+  ["本","běn","measure word for books","বই গণনার শব্দ"],["不客气","bú kèqi","you're welcome","স্বাগতম"],
+  ["不","bù","no/not","না"],["菜","cài","dish/vegetable","সবজি/খাবার"],["茶","chá","tea","চা"],
+  ["吃","chī","to eat","খাওয়া"],["出租车","chūzūchē","taxi","ট্যাক্সি"],
+  ["打电话","dǎ diànhuà","to make a phone call","ফোন করা"],["大","dà","big/large","বড়"],
+  ["的","de","possessive particle","এর (সম্বন্ধ কণা)"],["点","diǎn","o'clock/a little","টা (সময়)"],
+  ["电脑","diànnǎo","computer","কম্পিউটার"],["电视","diànshì","television","টেলিভিশন"],
+  ["电影","diànyǐng","movie/film","সিনেমা"],["东西","dōngxi","thing/stuff","জিনিস"],
+  ["都","dōu","all/both","সব/উভয়"],["读","dú","to read","পড়া"],
+  ["对不起","duìbuqǐ","sorry","দুঃখিত"],["多","duō","many/much","অনেক/বেশি"],
+  ["多少","duōshao","how many/how much","কতটুকু/কতজন"],["儿子","érzi","son","ছেলে"],
+  ["二","èr","two","দুই"],["饭店","fàndiàn","restaurant/hotel","রেস্তোরাঁ/হোটেল"],
+  ["飞机","fēijī","airplane","বিমান"],["分钟","fēnzhōng","minute","মিনিট"],
+  ["高兴","gāoxìng","happy/glad","খুশি/আনন্দিত"],["个","gè","general measure word","সাধারণ গণনার শব্দ"],
+  ["工作","gōngzuò","work/job","কাজ"],["狗","gǒu","dog","কুকুর"],
+  ["汉语","Hànyǔ","Chinese language","চীনা ভাষা"],["好","hǎo","good/well","ভালো"],
+  ["号","hào","number/date","নম্বর/তারিখ"],["喝","hē","to drink","পান করা"],
+  ["和","hé","and/with","এবং/সাথে"],["很","hěn","very","খুব"],
+  ["后面","hòumiàn","behind/back","পেছনে"],["回","huí","to return","ফিরে যাওয়া"],
+  ["会","huì","can/will","পারা/হবে"],["火车站","huǒchēzhàn","train station","রেলস্টেশন"],
+  ["几","jǐ","how many/some","কয়টা/কিছু"],["家","jiā","home/family","বাড়ি/পরিবার"],
+  ["叫","jiào","to be called","নাম হওয়া/ডাকা"],["今天","jīntiān","today","আজ"],
+  ["九","jiǔ","nine","নয়"],["开","kāi","to open/to drive","খোলা/চালানো"],
+  ["看","kàn","to look/to watch","দেখা"],["看见","kànjiàn","to see","দেখতে পাওয়া"],
+  ["块","kuài","yuan (money)","ইউয়ান (টাকা)"],["来","lái","to come","আসা"],
+  ["老师","lǎoshī","teacher","শিক্ষক"],["了","le","completed action particle","সম্পন্ন ক্রিয়া কণা"],
+  ["冷","lěng","cold","ঠান্ডা"],["里","lǐ","inside/in","ভেতরে"],
+  ["六","liù","six","ছয়"],["妈妈","māma","mother/mom","মা"],
+  ["马","mǎ","horse","ঘোড়া"],["吗","ma","question particle","প্রশ্ন কণা"],
+  ["买","mǎi","to buy","কেনা"],["猫","māo","cat","বিড়াল"],
+  ["没关系","méi guānxi","it doesn't matter","কোনো ব্যাপার না"],
+  ["没有","méiyǒu","don't have","নেই"],["米饭","mǐfàn","cooked rice","ভাত"],
+  ["明天","míngtiān","tomorrow","আগামীকাল"],["名字","míngzi","name","নাম"],
+  ["哪","nǎ","which","কোনটি"],["哪儿","nǎr","where","কোথায়"],
+  ["那","nà","that","ওটা/সেটা"],["呢","ne","question particle","প্রশ্ন কণা"],
+  ["能","néng","can/able to","পারা/সক্ষম"],["你","nǐ","you","তুমি/আপনি"],
+  ["年","nián","year","বছর"],["女儿","nǚér","daughter","মেয়ে"],
+  ["朋友","péngyou","friend","বন্ধু"],["漂亮","piàoliang","beautiful/pretty","সুন্দর"],
+  ["苹果","píngguǒ","apple","আপেল"],["七","qī","seven","সাত"],
+  ["前面","qiánmiàn","in front/ahead","সামনে"],["钱","qián","money","টাকা"],
+  ["请","qǐng","please/to invite","দয়া করে"],["去","qù","to go","যাওয়া"],
+  ["热","rè","hot","গরম"],["人","rén","person/people","মানুষ"],
+  ["认识","rènshi","to know/to recognize","চেনা/জানা"],["日","rì","day/sun","দিন/সূর্য"],
+  ["三","sān","three","তিন"],["商店","shāngdiàn","shop/store","দোকান"],
+  ["上","shàng","up/on/above","উপরে"],["上午","shàngwǔ","morning","সকাল"],
+  ["少","shǎo","few/less","কম"],["谁","shéi","who","কে"],
+  ["什么","shénme","what","কি"],["十","shí","ten","দশ"],
+  ["时候","shíhou","time/moment","সময়"],["是","shì","to be","হওয়া"],
+  ["书","shū","book","বই"],["水","shuǐ","water","পানি/জল"],
+  ["水果","shuǐguǒ","fruit","ফল"],["睡觉","shuìjiào","to sleep","ঘুমানো"],
+  ["说","shuō","to speak/to say","বলা"],["四","sì","four","চার"],
+  ["岁","suì","years old","বছর বয়স"],["他","tā","he/him","সে (পুরুষ)"],
+  ["她","tā","she/her","সে (মহিলা)"],["太","tài","too/very","অতিরিক্ত"],
+  ["天气","tiānqì","weather","আবহাওয়া"],["听","tīng","to listen","শোনা"],
+  ["同学","tóngxué","classmate","সহপাঠী"],["喂","wèi","hello (phone)","হ্যালো (ফোনে)"],
+  ["我","wǒ","I/me","আমি"],["我们","wǒmen","we/us","আমরা"],
+  ["五","wǔ","five","পাঁচ"],["下","xià","down/below/next","নিচে/পরবর্তী"],
+  ["下午","xiàwǔ","afternoon","বিকেল"],["下雨","xià yǔ","to rain","বৃষ্টি হওয়া"],
+  ["先生","xiānsheng","Mr./husband","জনাব/স্বামী"],["现在","xiànzài","now","এখন"],
+  ["想","xiǎng","to want/to think","চাওয়া/ভাবা"],["小","xiǎo","small/little","ছোট"],
+  ["小姐","xiǎojiě","Miss/young lady","মিস/তরুণী"],["些","xiē","some/a few","কিছু"],
+  ["写","xiě","to write","লেখা"],["谢谢","xièxie","thank you","ধন্যবাদ"],
+  ["星期","xīngqī","week","সপ্তাহ"],["学生","xuésheng","student","ছাত্র/শিক্ষার্থী"],
+  ["学习","xuéxí","to study/to learn","পড়াশোনা করা"],["学校","xuéxiào","school","স্কুল"],
+  ["一","yī","one","এক"],["一点儿","yīdiǎnr","a little/a bit","একটু"],
+  ["衣服","yīfu","clothes","জামাকাপড়"],["医生","yīshēng","doctor","ডাক্তার"],
+  ["医院","yīyuàn","hospital","হাসপাতাল"],["椅子","yǐzi","chair","চেয়ার"],
+  ["有","yǒu","to have/there is","থাকা/আছে"],["月","yuè","month/moon","মাস/চাঁদ"],
+  ["再见","zàijiàn","goodbye","বিদায়/আবার দেখা হবে"],["在","zài","at/in","এ/তে/আছে"],
+  ["怎么","zěnme","how/why","কিভাবে/কেন"],["怎么样","zěnmeyàng","how about","কেমন লাগছে"],
+  ["这","zhè","this","এটা/এই"],["中国","Zhōngguó","China","চীন"],
+  ["中午","zhōngwǔ","noon/midday","দুপুর"],["住","zhù","to live/to stay","থাকা/বাস করা"],
+  ["桌子","zhuōzi","table/desk","টেবিল"],["字","zì","character/word","অক্ষর/শব্দ"],
+  ["昨天","zuótiān","yesterday","গতকাল"],["坐","zuò","to sit/to ride","বসা/চড়া"],
+  ["做","zuò","to do/to make","করা/বানানো"],
+];
+
+const numbers = [
+  ["一","yī","এক"],["二","èr","দুই"],["三","sān","তিন"],["四","sì","চার"],
+  ["五","wǔ","পাঁচ"],["六","liù","ছয়"],["七","qī","সাত"],["八","bā","আট"],
+  ["九","jiǔ","নয়"],["十","shí","দশ"],["十一","shí yī","এগারো"],
+  ["十二","shí èr","বারো"],["十三","shí sān","তেরো"],["十四","shí sì","চৌদ্দ"],
+  ["十五","shí wǔ","পনেরো"],["十六","shí liù","ষোলো"],["十七","shí qī","সতেরো"],
+  ["十八","shí bā","আঠারো"],["十九","shí jiǔ","উনিশ"],["二十","èr shí","বিশ"],
+];
+
+let currentTab = 'vocab';
+let modalChars = [], modalIdx = 0, modalPinyin = '', modalBangla = '';
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').style.display = 'block';
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('install-banner').style.display = 'none';
+    });
+  }
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', (i===0 && tab==='vocab') || (i===1 && tab==='numbers'));
+  });
+  document.getElementById('search').value = '';
+  renderContent(tab === 'vocab' ? vocab : numbers, tab);
+}
+
+function filterCards() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  const data = currentTab === 'vocab' ? vocab : numbers;
+  const filtered = q ? data.filter(r => r.some(v => v.toLowerCase().includes(q))) : data;
+  renderContent(filtered, currentTab);
+}
+
+function renderContent(data, tab) {
+  const el = document.getElementById('content');
+  document.getElementById('count-label').textContent = data.length + ' / ' + (tab==='vocab'?vocab:numbers).length + ' টি';
+
+  if (data.length === 0) {
+    el.innerHTML = '<div class="empty">কোনো শব্দ পাওয়া যায়নি</div>';
+    return;
+  }
+
+  let html = '';
+  if (tab === 'numbers') {
+    html += `<div class="section-header">
+      <div class="slabel">✦ সংখ্যা ✦</div>
+      <h2>চীনা সংখ্যা ১ – ২০</h2>
+      <p>Chinese numbers · ▶ চাপলে লেখার ক্রম দেখবে</p>
+    </div>`;
+  }
+
+  data.forEach(([zh, py, en, bn], i) => {
+    const isNum = tab === 'numbers';
+    const cls = isNum ? (i%2===0?'num-even':'num-odd') : (i%2===0?'even':'odd');
+    const bangla = isNum ? en : bn;
+    const english = isNum ? '' : en;
+    html += `<div class="card ${cls}">
+      <div class="serial">${i+1}</div>
+      <div class="zh${isNum?' num':''}">${zh}</div>
+      <div class="info">
+        <div class="pinyin">${py}</div>
+        <div class="bangla">${bangla}</div>
+        ${english ? `<div class="english">${english}</div>` : ''}
+      </div>
+      <button class="playbtn" onclick="openModal('${zh.replace(/'/g,"\\'")}','${py.replace(/'/g,"\\'")}','${bangla.replace(/'/g,"\\'")}')">▶</button>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function openModal(zh, py, bn) {
+  modalChars = zh.split('').filter(c => c.trim());
+  modalIdx = 0;
+  modalPinyin = py;
+  modalBangla = bn;
+  document.getElementById('modal-overlay').classList.add('open');
+  renderModal();
+}
+
+function renderModal() {
+  const ch = modalChars[modalIdx];
+
+  // Highlight active char
+  const wordHtml = modalChars.map((c,i) =>
+    `<span style="color:${i===modalIdx?'#fff':'rgba(255,255,255,0.22)'};transition:color 0.2s">${c}</span>`
+  ).join('');
+  document.getElementById('modal-word').innerHTML = wordHtml;
+  document.getElementById('modal-sub').textContent = modalPinyin + ' · ' + modalBangla;
+  document.getElementById('modal-counter').textContent = modalChars.length > 1 ? (modalIdx+1)+' / '+modalChars.length : '';
+
+  // Build iframe HTML
+  const ihtml = `<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<style>*{margin:0;padding:0;box-sizing:border-box;}body{background:#0d0820;display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;}</style>
+</head><body><div id="t"></div>
+<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"><\/script>
+<script>window.onload=function(){try{var w=HanziWriter.create('t','${ch}',{width:210,height:210,padding:14,strokeColor:'#ffffff',radicalColor:'#c9a84c',outlineColor:'rgba(255,255,255,0.18)',strokeAnimationSpeed:0.9,delayBetweenStrokes:300});w.animateCharacter();window.replay=function(){w.animateCharacter()};}catch(e){}}<\/script>
+</body></html>`;
+
+  const iframe = document.getElementById('modal-iframe');
+  iframe.srcdoc = ihtml;
+
+  // Buttons
+  const btns = document.getElementById('modal-btns');
+  let b = '';
+  if (modalChars.length > 1) {
+    b += `<button class="mbtn mbtn-nav" onclick="navModal(-1)" ${modalIdx===0?'disabled':''}>◀ আগে</button>`;
+    b += `<button class="mbtn mbtn-gold" onclick="replayModal()">🔄</button>`;
+    b += `<button class="mbtn mbtn-nav" onclick="navModal(1)" ${modalIdx===modalChars.length-1?'disabled':''}>পরে ▶</button>`;
+    b += `<br style="width:100%">`;
+  } else {
+    b += `<button class="mbtn mbtn-gold" onclick="replayModal()">🔄 আবার দেখো</button>`;
+  }
+  b += `<button class="mbtn mbtn-white" onclick="closeModal()">✕ বন্ধ</button>`;
+  btns.innerHTML = b;
+}
+
+function navModal(dir) {
+  modalIdx = Math.max(0, Math.min(modalChars.length-1, modalIdx+dir));
+  renderModal();
+}
+function replayModal() {
+  try { document.getElementById('modal-iframe').contentWindow.replay(); } catch(e) {}
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// Init
+renderContent(vocab, 'vocab');
+
+// Service Worker for PWA offline
+if ('serviceWorker' in navigator) {
+  const sw = `
+const CACHE='hsk1-v1';
+const FILES=['/'];
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));
+self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
+  `;
+  const blob = new Blob([sw], {type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+</script>
+
+<!-- PWA Manifest inline -->
+<script>
+const manifest = {
+  name: "HSK 1 শব্দভান্ডার",
+  short_name: "HSK 1",
+  description: "চীনা ভাষা শিক্ষার app - HSK 1 শব্দভান্ডার বাংলায়",
+  start_url: ".",
+  display: "standalone",
+  background_color: "#0a0a18",
+  theme_color: "#0d0820",
+  orientation: "portrait",
+  icons: [{
+    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230d0820'/><text x='96' y='130' font-size='110' text-anchor='middle' fill='white' font-family='serif'>汉</text></svg>",
+    sizes: "192x192", type: "image/svg+xml"
+  }]
+};
+const mblob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+const mlink = document.createElement('link');
+mlink.rel = 'manifest';
+mlink.href = URL.createObjectURL(mblob);
+document.head.appendChild(mlink);
+</script>
+</body>
+</html>
